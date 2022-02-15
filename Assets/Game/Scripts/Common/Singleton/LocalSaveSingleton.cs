@@ -7,8 +7,8 @@ namespace Game.Scripts.Common.Singleton {
          // ReSharper disable once InconsistentNaming
         private static T _instance;
 
-        private const string AES_IV = @"WnZr4u7x!A%D*F-J"; // iv seed 16 characters
-        private const string AES_KEY = @"Zq4t7w!z%C*F-JaNdRgUjXn2r5u8x/A?"; //32 characters
+        private const string AES_IV = @"r5u8x/A?D(G-KaPd"; // iv seed 16 characters
+        private const string AES_KEY = @"D(G+KbPeShVkYp3s6v9y$B&E)H@McQfT"; //32 characters
         // ReSharper disable once InconsistentNaming
         private static readonly string _fileName = typeof(T).FullName;
 

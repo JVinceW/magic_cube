@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 
 namespace Game.Scripts.Common.Utils {
-    public class CryptoUtil {
+    public static class CryptoUtil {
         #region SHA1
         public static string Sha1(string str) {
             using (var sha1 = SHA1.Create()) {
