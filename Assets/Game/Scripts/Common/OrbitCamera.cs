@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using Game.Scripts.Core;
 using UniRx;
 using UniRx.Triggers;
@@ -21,9 +22,12 @@ namespace Game.Scripts.Common {
 
         private void Start() {
             _cameraOffset = transform.position - target.position;
-            transform.LookAt(target);
+            UniTask.Create(async () => {
+                await UniTask.WaitUntil(() => target != null);
+                transform.LookAt(target);
+            }).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
             this.LateUpdateAsObservable()
-                .SkipWhile(x => !MainGameManager.instance.CanZoomCamera)
+                .SkipWhile(x => !MainGameManager.instance.CanManipulateCamera)
                 .Subscribe(x => UpdateCameraManipulation()).AddTo(this);
         }
 
@@ -37,7 +41,9 @@ namespace Game.Scripts.Common {
                 _cameraOffset = camAngle * _cameraOffset;
 
                 transform.position = Vector3.Slerp(transform.position, newPos, _smoothness);
-                transform.LookAt(target);
+                if (target != null) {
+                    transform.LookAt(target);
+                }
             } else {
                 // Translating camera on PC with mouse wheel.
                 _zoomAmountMouse += Input.GetAxis("Mouse ScrollWheel");
@@ -50,5 +56,6 @@ namespace Game.Scripts.Common {
                 _cameraOffset = transform.position - target.position;
             }
         }
+
     }
 }
