@@ -8,7 +8,22 @@ namespace Game.Scripts.RubikCube {
         private CubePieceStateData _stateData = new CubePieceStateData();
         private Vector3 _localCoordOnCube;
         
-        public CubePieceStateData StateData => _stateData;
+        public CubePieceStateData StateData {
+            get {
+                SetStateData();
+                return _stateData;
+            }
+        }
+
+        public Vector3Int OriginalCoord => _originalCoord;
+
+        public void UpdatePieceWithStateData(CubePieceStateData data) {
+            var pos = new Vector3(data.positionX, data.positionY, data.positionZ);
+            var rot = Quaternion.Euler(data.rotX, data.rotY, data.rotZ);
+            var t = transform;
+            t.position = pos;
+            t.rotation = rot;
+        }
 
         public void SetStateData() {
             var t = transform;

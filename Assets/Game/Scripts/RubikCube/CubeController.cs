@@ -49,8 +49,13 @@ namespace Game.Scripts.RubikCube {
                 .Where(x => _isRayCastedOnCube)
                 .Subscribe(x => ManipulateCube()).AddTo(this);
             _cubePieces = GetComponentsInChildren<CubePiece>().ToList();
+            ConstructCubeData().Forget();
+        }
+
+        private async UniTask ConstructCubeData() {
             if (PlayerLocalSaveData.instance.LastPlayedRubickSize == 0) {
                 PlayerLocalSaveData.instance.LastPlayedRubickSize = _cubeSize;
+                await ShuffleCube();
                 PlayerLocalSaveData.instance.LastPlayedCubePieceStateDatas = _cubePieces.Select(x => x.StateData).ToList();
                 PlayerLocalSaveData.Save();
             } else {
@@ -60,6 +65,20 @@ namespace Game.Scripts.RubikCube {
 
         private void ConstructCubeStateFromSaveData() {
             Debug.Log("Start construct rubick cube");
+            var playerData = PlayerLocalSaveData.instance.LastPlayedCubePieceStateDatas;
+            var cubeLst = new List<CubePiece>(_cubePieces);
+            foreach (var pieceState in playerData) {
+                var pieceCoord = new Vector3Int(pieceState.coordinatorX, pieceState.coordinatorY,
+                    pieceState.coordinatorZ);
+                var p = cubeLst.FirstOrDefault(x => x.OriginalCoord == pieceCoord);
+                if (p != null) {
+                    Debug.Log($"Setup piece: {pieceState}");
+                    p.UpdatePieceWithStateData(pieceState);
+                    cubeLst.Remove(p);
+                }
+            }
+
+            _finishedInit = true;
         }
 
         [Button("Shuffle")]
@@ -73,7 +92,7 @@ namespace Game.Scripts.RubikCube {
         }
 
         private async UniTask ShuffleCube() {
-            var faceList = _command.GetAllPieceOnFaceDetector;
+            var faceList = _pieceOnFaceDetectors;
             var rotateDirection = FaceRotationType.CLOCKWISE;
             var shuffleStep = Random.Range(_shuffleMinStep, _shuffleMaxStep);
             Debug.Log($"Shuffle Step: {shuffleStep}");
@@ -82,7 +101,6 @@ namespace Game.Scripts.RubikCube {
                 var face = faceList[randomShuffleFace];
                 await _command.ExecuteRotate(face, rotateDirection, this.GetCancellationTokenOnDestroy());
             }
-
             _finishedInit = true;
         }
 
