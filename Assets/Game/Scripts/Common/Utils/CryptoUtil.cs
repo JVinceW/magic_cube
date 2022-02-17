@@ -72,14 +72,13 @@ namespace Game.Scripts.Common.Utils {
                 aesManaged.BlockSize = 128;
                 aesManaged.Key = keySeed;
                 aesManaged.IV = iv;
-                aesManaged.Padding = PaddingMode.PKCS7;
+                aesManaged.Padding = PaddingMode.None;
                 var encryptor = aesManaged.CreateEncryptor(aesManaged.Key, aesManaged.IV);
                 using (var msStream = new MemoryStream()) {
                     using (var csStream = new CryptoStream(msStream, encryptor, CryptoStreamMode.Write)) {
                         using (var streamWriter = new StreamWriter(csStream)) {
                             streamWriter.Write(data);
                             var encrypted = msStream.ToArray();
-
                             return encrypted;
                         }
                     }
@@ -106,18 +105,16 @@ namespace Game.Scripts.Common.Utils {
         // ReSharper disable once InconsistentNaming
         public static string AESDecrypt(byte[] data, byte[] iv, byte[] keySeed) {
             using (var aesManaged = new AesManaged()) {
-                var plainText = "";
                 aesManaged.KeySize = 256;
                 aesManaged.BlockSize = 128;
                 aesManaged.Key = keySeed;
                 aesManaged.IV = iv;
-                aesManaged.Padding = PaddingMode.PKCS7;
+                aesManaged.Padding = PaddingMode.None;
                 var deCryptor = aesManaged.CreateDecryptor(aesManaged.Key, aesManaged.IV);
                 using (var msStream = new MemoryStream(data)) {
                     using (var csStream = new CryptoStream(msStream, deCryptor, CryptoStreamMode.Read)) {
                         using (var streamReader = new StreamReader(csStream)) {
-                            plainText = streamReader.ReadToEnd();
-                            return plainText;
+                            return streamReader.ReadToEnd();
                         }
                     }
                 }

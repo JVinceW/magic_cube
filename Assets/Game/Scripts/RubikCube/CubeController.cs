@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Game.Scripts.Common;
 using Game.Scripts.Core;
 using Game.Scripts.RubikCube.Const;
 using NaughtyAttributes;
@@ -15,6 +17,7 @@ namespace Game.Scripts.RubikCube {
         [SerializeField] private LayerMask _cubeCastLayerMask;
         [SerializeField] private int _shuffleMinStep = 10;
         [SerializeField] private int _shuffleMaxStep = 20;
+        [SerializeField] private int _cubeSize;
 
         private bool _isRayCastedOnCube;
         [SerializeField] private bool _finishedInit;
@@ -22,6 +25,7 @@ namespace Game.Scripts.RubikCube {
         private Transform _rayCastHitCubePiece;
         private bool _isRotating;
         private const float ROTATE_DIRECTION_DETECTION_THRESHOLD = 10;
+        private List<CubePiece> _cubePieces = new List<CubePiece>();
 
         private void Start() {
             this.UpdateAsObservable()
@@ -44,11 +48,29 @@ namespace Game.Scripts.RubikCube {
             this.UpdateAsObservable()
                 .Where(x => _isRayCastedOnCube)
                 .Subscribe(x => ManipulateCube()).AddTo(this);
+            _cubePieces = GetComponentsInChildren<CubePiece>().ToList();
+            PlayerLocalSaveData.Load();
+            if (PlayerLocalSaveData.instance.LastPlayedRubickSize == 0) {
+                PlayerLocalSaveData.instance.LastPlayedRubickSize = _cubeSize;
+                PlayerLocalSaveData.instance.LastPlayedCubePieceStateDatas = _cubePieces.Select(x => x.StateData).ToList();
+                PlayerLocalSaveData.Save();
+            } else {
+                ConstructCubeStateFromSaveData();
+            }
+        }
+
+        private void ConstructCubeStateFromSaveData() {
+            Debug.Log("Start construct rubick cube");
         }
 
         [Button("Shuffle")]
         private void Shuffle() {
             ShuffleCube().Forget();
+        }
+
+        [Button("Reset Save Data")]
+        private void ResetSaveData() {
+            PlayerLocalSaveData.Reset();
         }
 
         private async UniTask ShuffleCube() {
@@ -127,6 +149,7 @@ namespace Game.Scripts.RubikCube {
                 _isRayCastedOnCube = false;
             }
         }
+        
 
 #if UNITY_EDITOR
         private void Reset() {

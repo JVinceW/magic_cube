@@ -2051,6 +2051,7 @@ MonoBehaviour:
     m_Bits: 256
   _shuffleMinStep: 10
   _shuffleMaxStep: 20
+  _cubeSize: 3
   _finishedInit: 0
 --- !u!114 &1174985363
 MonoBehaviour:
