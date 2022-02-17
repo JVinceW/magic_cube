@@ -42,7 +42,8 @@
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0",
-    "jillejr.newtonsoft.json-for-unity": "13.0.102"
+    "jillejr.newtonsoft.json-for-unity": "13.0.102",
+    "com.dbrizov.naughtyattributes": "2.1.4"
   },
   "scopedRegistries": [
     {
@@ -50,6 +51,7 @@
       "url": "https://package.openupm.com",
       "scopes": [
         "com.cysharp.unitask",
+        "com.dbrizov.naughtyattributes",
         "com.littlebigfun.addressable-importer",
         "com.neuecc.unirx",
         "com.openupm",
