@@ -20,8 +20,7 @@ namespace Game.Scripts.RubikCube {
 
         public List<GameObject> DetectPieceOnFace() {
             var colObj = new Collider[9];
-            var collidedCnt = Physics.OverlapBoxNonAlloc(transform.position, _boxCollider.size / 2f, colObj, Quaternion.identity, _checkLayerMask);
-            Debug.Log($"Collider Count: {collidedCnt}");
+            Physics.OverlapBoxNonAlloc(transform.position, _boxCollider.size / 2f, colObj, Quaternion.identity, _checkLayerMask);
             return colObj.Where(x => x != null).Select(x => x.gameObject).ToList();
         }
 

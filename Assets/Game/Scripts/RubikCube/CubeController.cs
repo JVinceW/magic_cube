@@ -17,8 +17,11 @@ namespace Game.Scripts.RubikCube {
         [SerializeField] private int _shuffleMaxStep = 20;
 
         private bool _isRayCastedOnCube;
-        private bool _finishedInit;
+        [SerializeField] private bool _finishedInit;
         private Vector3 _onClickedMousePosition;
+        private Transform _rayCastHitCubePiece;
+        private bool _isRotating;
+        private const float ROTATE_DIRECTION_DETECTION_THRESHOLD = 10;
 
         private void Start() {
             this.UpdateAsObservable()
@@ -27,6 +30,7 @@ namespace Game.Scripts.RubikCube {
                     if (!_finishedInit) {
                         return;
                     }
+
                     CheckClickOnCubePiece();
                 }).AddTo(this);
             this.UpdateAsObservable()
@@ -34,6 +38,7 @@ namespace Game.Scripts.RubikCube {
                 .Subscribe(x => {
                     _isRayCastedOnCube = false;
                     _onClickedMousePosition = Vector3.zero;
+                    _rayCastHitCubePiece = null;
                     MainGameManager.instance.CanManipulateCamera = true;
                 }).AddTo(this);
             this.UpdateAsObservable()
@@ -61,9 +66,43 @@ namespace Game.Scripts.RubikCube {
         }
 
         private void ManipulateCube() {
+            if (_isRotating) {
+                return;
+            }
+
             var nowPos = Input.mousePosition;
             var direction = nowPos - _onClickedMousePosition;
-            Debug.Log($"Direction : {direction}");
+
+            // check if rotate horizontal or rotate vertically
+            var xDir = direction.x;
+            var yDir = direction.y;
+
+            if (Mathf.Abs(xDir - yDir) < ROTATE_DIRECTION_DETECTION_THRESHOLD) {
+                return;
+            }
+
+            // x > y: rotate horizontally
+            // x < y: rotate vertically
+            var faceDetectors = _pieceOnFaceDetectors
+                .Where(x => x.DetectPieceOnFace().Contains(_rayCastHitCubePiece.gameObject))
+                .ToList();
+            PieceOnFaceDetector selectedDetector;
+            FaceRotationType rotationType;
+            // Rotate vertically relate to the camera position
+            if (Mathf.Abs(xDir) > Mathf.Abs(yDir)) {
+                selectedDetector = faceDetectors.FirstOrDefault(x => x.RotationAxis == "y");
+                rotationType = xDir > 0 ? FaceRotationType.COUNTER_CLOCKWISE : FaceRotationType.CLOCKWISE;
+            } else {
+                selectedDetector = faceDetectors.FirstOrDefault(x => x.RotationAxis == "x");
+                rotationType = yDir > 0 ? FaceRotationType.CLOCKWISE : FaceRotationType.COUNTER_CLOCKWISE;
+            }
+            if (selectedDetector != null) {
+                _isRotating = true;
+                UniTask.Create(async () => {
+                    await _command.ExecuteRotate(selectedDetector, rotationType, this.GetCancellationTokenOnDestroy());
+                    _isRotating = false;
+                }).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+            }
         }
 
         private void CheckClickOnCubePiece() {
@@ -82,8 +121,8 @@ namespace Game.Scripts.RubikCube {
             var nearest = hits.FirstOrDefault(x => x.distance <= min);
             if (nearest.transform != null) {
                 _isRayCastedOnCube = true;
+                _rayCastHitCubePiece = nearest.transform;
                 _onClickedMousePosition = Input.mousePosition;
-                Debug.Log($"Hit piece", nearest.transform);
             } else {
                 _isRayCastedOnCube = false;
             }
