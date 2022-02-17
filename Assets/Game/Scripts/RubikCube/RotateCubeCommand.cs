@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -9,6 +8,7 @@ using UnityEngine;
 
 namespace Game.Scripts.RubikCube {
     public class RotateCubeCommand : MonoBehaviour {
+        [SerializeField] private Transform _originalParent;
         [SerializeField] private PieceOnFaceDetector[] _pieceOnFaceDetectors;
         [SerializeField] private float _rotateSpeed = .5f; 
         private bool _isRotating;
@@ -67,7 +67,7 @@ namespace Game.Scripts.RubikCube {
 
         private void ReturnGameObjectToCube(List<GameObject> faceGos) {
             foreach (var go in faceGos) {
-                go.transform.SetParent(transform);
+                go.transform.SetParent(_originalParent);
             }
         }
 
