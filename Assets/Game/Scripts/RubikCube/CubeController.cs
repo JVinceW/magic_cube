@@ -18,9 +18,8 @@ namespace Game.Scripts.RubikCube {
         [SerializeField] private int _shuffleMinStep = 10;
         [SerializeField] private int _shuffleMaxStep = 20;
         [SerializeField] private int _cubeSize;
-
         private bool _isRayCastedOnCube;
-        [SerializeField] private bool _finishedInit;
+        private bool _finishedInit;
         private Vector3 _onClickedMousePosition;
         private Transform _rayCastHitCubePiece;
         private bool _isRotating;
@@ -34,7 +33,6 @@ namespace Game.Scripts.RubikCube {
                     if (!_finishedInit) {
                         return;
                     }
-
                     CheckClickOnCubePiece();
                 }).AddTo(this);
             this.UpdateAsObservable()
