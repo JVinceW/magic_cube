@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
@@ -6,12 +7,18 @@ using Game.Scripts.RubikCube.Const;
 using UnityEngine;
 
 namespace Game.Scripts.RubikCube {
-    public class RotateCubeCommand : MonoBehaviour {
+    public class RotateCubeCommand : MonoBehaviour, IDisposable {
         [SerializeField] private Transform _originalParent;
-        [SerializeField] private PieceOnFaceDetector[] _pieceOnFaceDetectors;
         [SerializeField] private float _rotateSpeed = .5f;
 
-        public PieceOnFaceDetector[] GetAllPieceOnFaceDetector => _pieceOnFaceDetectors;
+        private readonly Stack<CommandData> _commandLst = new Stack<CommandData>();
+
+        public class CommandData {
+            public PieceOnFaceDetector Detector;
+            public FaceRotationType RotationDirection;
+        }
+
+        // public PieceOnFaceDetector[] GetAllPieceOnFaceDetector => _pieceOnFaceDetectors;
         private bool _isRotating;
 
         public async UniTask ExecuteRotate(PieceOnFaceDetector detector, FaceRotationType rotationDirection,
@@ -34,6 +41,26 @@ namespace Game.Scripts.RubikCube {
             await detector.transform.DORotateQuaternion(targetRot, _rotateSpeed).ToUniTask(cancellationToken: ct);
             ReturnGameObjectToCube(gos);
             _isRotating = false;
+        }
+
+        public async UniTask<bool> Undo(CancellationToken ct = default) {
+            if (_commandLst.Count <= 0) {
+                Debug.Log("No more Step to undo");
+                return false;
+            }
+            var commandData = _commandLst.Pop();
+            await ExecuteRotate(commandData.Detector, commandData.RotationDirection, ct);
+            return true;
+        }
+
+        public void AddCommand(PieceOnFaceDetector detector, FaceRotationType rotationDirection) {
+            var commandData = new CommandData {
+                Detector = detector,
+                RotationDirection = rotationDirection == FaceRotationType.CLOCKWISE
+                    ? FaceRotationType.COUNTER_CLOCKWISE
+                    : FaceRotationType.CLOCKWISE
+            };
+            _commandLst.Push(commandData);
         }
 
         private static Quaternion GetTargetRotation(PieceOnFaceDetector detector, float rotateDeg) {
@@ -70,10 +97,8 @@ namespace Game.Scripts.RubikCube {
             }
         }
 
-#if UNITY_EDITOR
-        private void Reset() {
-            _pieceOnFaceDetectors = GetComponentsInChildren<PieceOnFaceDetector>();
+        public void Dispose() {
+            _commandLst.Clear();
         }
-#endif
     }
 }

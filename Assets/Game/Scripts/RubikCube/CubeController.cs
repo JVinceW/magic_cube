@@ -77,8 +77,18 @@ namespace Game.Scripts.RubikCube {
                     cubeLst.Remove(p);
                 }
             }
-
             _finishedInit = true;
+        }
+
+        private void UpdateLocalStateAfterMove() {
+            var piecesData = new List<CubePieceStateData>();
+            foreach (var piece in _cubePieces) {
+                piece.SetStateData();
+                piecesData.Add(piece.StateData);
+            }
+
+            PlayerLocalSaveData.instance.LastPlayedCubePieceStateDatas = piecesData;
+            PlayerLocalSaveData.Save();
         }
 
         [Button("Shuffle")]
@@ -89,6 +99,11 @@ namespace Game.Scripts.RubikCube {
         [Button("Reset Save Data")]
         private void ResetSaveData() {
             PlayerLocalSaveData.Reset();
+        }
+
+        [Button("Undo Move")]
+        private void Undo() {
+            _command.Undo().Forget();
         }
 
         private async UniTask ShuffleCube() {
@@ -138,7 +153,9 @@ namespace Game.Scripts.RubikCube {
             if (selectedDetector != null) {
                 _isRotating = true;
                 UniTask.Create(async () => {
+                    _command.AddCommand(selectedDetector, rotationType);
                     await _command.ExecuteRotate(selectedDetector, rotationType, this.GetCancellationTokenOnDestroy());
+                    UpdateLocalStateAfterMove();
                     _isRotating = false;
                 }).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
             }
