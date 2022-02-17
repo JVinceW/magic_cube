@@ -181,6 +181,13 @@ namespace Game.Scripts.RubikCube {
                 _isRayCastedOnCube = false;
             }
         }
+
+        private void CheckPuzzleDone() {
+            var isAllAtRightPos = _cubePieces.All(x => x.IsAtRightPosition());
+            if (isAllAtRightPos) {
+                
+            }
+        }
         
 
 #if UNITY_EDITOR

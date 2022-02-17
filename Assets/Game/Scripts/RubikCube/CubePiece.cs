@@ -5,9 +5,17 @@ using UnityEngine;
 namespace Game.Scripts.RubikCube {
     public class CubePiece : MonoBehaviour {
         [SerializeField] private Vector3Int _originalCoord;
-        private CubePieceStateData _stateData = new CubePieceStateData();
-        private Vector3 _localCoordOnCube;
+        private readonly CubePieceStateData _stateData = new CubePieceStateData();
+        private Vector3 _originalPos;
         
+        public bool IsAtRightPosition() {
+            return transform.position == _originalPos;
+        }
+
+        private void Start() {
+            _originalPos = transform.position;
+        }
+
         public CubePieceStateData StateData {
             get {
                 SetStateData();
@@ -40,10 +48,6 @@ namespace Game.Scripts.RubikCube {
             _stateData.rotX = rot.x;
             _stateData.rotY = rot.y;
             _stateData.rotZ = rot.z;
-            
-            // _stateData.coordinator = _originalCoord;
-            // _stateData.position = t.position;
-            // _stateData.rotation = t.rotation;
         }
 
 #if UNITY_EDITOR

@@ -14,10 +14,5 @@ namespace Game.Scripts.RubikCube {
         public float rotX;
         public float rotY;
         public float rotZ;
-        
-        
-        // public Vector3Int coordinator;
-        // public Vector3 position;
-        // public Quaternion rotation;
     }
 }
