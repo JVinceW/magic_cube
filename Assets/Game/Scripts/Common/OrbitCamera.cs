@@ -27,8 +27,13 @@ namespace Game.Scripts.Common {
                 transform.LookAt(target);
             }).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
             this.LateUpdateAsObservable()
-                .SkipWhile(x => !MainGameManager.instance.CanManipulateCamera)
-                .Subscribe(x => UpdateCameraManipulation()).AddTo(this);
+                // .SkipWhile(x => MainGameManager.instance.CanManipulateCamera == false)
+                .Subscribe(x => {
+                    if (MainGameManager.instance.CanManipulateCamera == false) {
+                        return;
+                    }
+                    UpdateCameraManipulation();
+                }).AddTo(this);
         }
 
         private void UpdateCameraManipulation() {
