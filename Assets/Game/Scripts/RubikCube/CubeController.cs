@@ -13,14 +13,22 @@ namespace Game.Scripts.RubikCube {
         [SerializeField] private PieceOnFaceDetector[] _pieceOnFaceDetectors;
         [SerializeField] private RotateCubeCommand _command;
         [SerializeField] private LayerMask _cubeCastLayerMask;
+        [SerializeField] private int _shuffleMinStep = 10;
+        [SerializeField] private int _shuffleMaxStep = 20;
 
         private bool _isRayCastedOnCube;
+        private bool _finishedInit;
         private Vector3 _onClickedMousePosition;
 
         private void Start() {
             this.UpdateAsObservable()
                 .Where(x => Input.GetMouseButtonDown(0))
-                .Subscribe(x => { CheckClickOnCubePiece(); }).AddTo(this);
+                .Subscribe(x => {
+                    if (!_finishedInit) {
+                        return;
+                    }
+                    CheckClickOnCubePiece();
+                }).AddTo(this);
             this.UpdateAsObservable()
                 .Where(x => Input.GetMouseButtonUp(0))
                 .Subscribe(x => {
@@ -41,13 +49,15 @@ namespace Game.Scripts.RubikCube {
         private async UniTask ShuffleCube() {
             var faceList = _command.GetAllPieceOnFaceDetector;
             var rotateDirection = FaceRotationType.CLOCKWISE;
-            var shuffleStep = Random.Range(20, 30);
+            var shuffleStep = Random.Range(_shuffleMinStep, _shuffleMaxStep);
             Debug.Log($"Shuffle Step: {shuffleStep}");
             for (var i = 0; i < shuffleStep; i++) {
                 var randomShuffleFace = Random.Range(0, faceList.Length - 1);
                 var face = faceList[randomShuffleFace];
                 await _command.ExecuteRotate(face, rotateDirection, this.GetCancellationTokenOnDestroy());
             }
+
+            _finishedInit = true;
         }
 
         private void ManipulateCube() {
