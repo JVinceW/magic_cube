@@ -49,7 +49,6 @@ namespace Game.Scripts.RubikCube {
                 .Where(x => _isRayCastedOnCube)
                 .Subscribe(x => ManipulateCube()).AddTo(this);
             _cubePieces = GetComponentsInChildren<CubePiece>().ToList();
-            PlayerLocalSaveData.Load();
             if (PlayerLocalSaveData.instance.LastPlayedRubickSize == 0) {
                 PlayerLocalSaveData.instance.LastPlayedRubickSize = _cubeSize;
                 PlayerLocalSaveData.instance.LastPlayedCubePieceStateDatas = _cubePieces.Select(x => x.StateData).ToList();
