@@ -1,17 +1,14 @@
 using System.Collections.Generic;
 using System.Linq;
-using Game.Scripts.RubikCube.Const;
 using UnityEngine;
 
 namespace Game.Scripts.RubikCube {
     [RequireComponent(typeof(BoxCollider))]
     public class PieceOnFaceDetector : MonoBehaviour {
-        [SerializeField] private CubeFaceType _cubeFaceType;
         [SerializeField] private BoxCollider _boxCollider;
         [SerializeField] private string _rotationAxis;
         [SerializeField] private LayerMask _checkLayerMask;
 
-        public CubeFaceType CubeFaceType => _cubeFaceType;
         public string RotationAxis => _rotationAxis;
 
         /// <summary>

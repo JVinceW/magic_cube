@@ -6,53 +6,84 @@ using NaughtyAttributes;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Game.Scripts.RubikCube {
     public class CubeController : MonoBehaviour {
+        [SerializeField] private PieceOnFaceDetector[] _pieceOnFaceDetectors;
         [SerializeField] private RotateCubeCommand _command;
-
-        [SerializeField] private CubeFaceType _testCubeFaceType;
         [SerializeField] private LayerMask _cubeCastLayerMask;
-        [SerializeField] private float _rayCastMaxRange;
+
+        private bool _isRayCastedOnCube;
+        private Vector3 _onClickedMousePosition;
 
         private void Start() {
-            this.UpdateAsObservable().Subscribe(x => { Manipulation(); }).AddTo(this);
             this.UpdateAsObservable()
                 .Where(x => Input.GetMouseButtonDown(0))
-                .Subscribe(x => { CheckClickOnCube(); }).AddTo(this);
+                .Subscribe(x => { CheckClickOnCubePiece(); }).AddTo(this);
             this.UpdateAsObservable()
                 .Where(x => Input.GetMouseButtonUp(0))
                 .Subscribe(x => {
+                    _isRayCastedOnCube = false;
+                    _onClickedMousePosition = Vector3.zero;
                     MainGameManager.instance.CanManipulateCamera = true;
                 }).AddTo(this);
+            this.UpdateAsObservable()
+                .Where(x => _isRayCastedOnCube)
+                .Subscribe(x => ManipulateCube()).AddTo(this);
         }
 
-        private void Manipulation() {
-            if (Input.GetKeyDown(KeyCode.Space)) {
-                _command.ExecuteRotate(_testCubeFaceType, FaceRotationType.CLOCKWISE,
-                    this.GetCancellationTokenOnDestroy()).Forget();
+        [Button("Shuffle")]
+        private void Shuffle() {
+            ShuffleCube().Forget();
+        }
+
+        private async UniTask ShuffleCube() {
+            var faceList = _command.GetAllPieceOnFaceDetector;
+            var rotateDirection = FaceRotationType.CLOCKWISE;
+            var shuffleStep = Random.Range(20, 30);
+            Debug.Log($"Shuffle Step: {shuffleStep}");
+            for (var i = 0; i < shuffleStep; i++) {
+                var randomShuffleFace = Random.Range(0, faceList.Length - 1);
+                var face = faceList[randomShuffleFace];
+                await _command.ExecuteRotate(face, rotateDirection, this.GetCancellationTokenOnDestroy());
             }
         }
 
-        [Button("Can Manipulate")]
-        private void CanManipulate() {
-            MainGameManager.instance.CanManipulateCamera = true;
+        private void ManipulateCube() {
+            var nowPos = Input.mousePosition;
+            var direction = nowPos - _onClickedMousePosition;
+            Debug.Log($"Direction : {direction}");
         }
 
-        private void CheckClickOnCube() {
+        private void CheckClickOnCubePiece() {
             if (Camera.main == null) return;
             var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
             var hits = new RaycastHit[10];
-            var rayCastCnt = Physics.RaycastNonAlloc(ray, hits, _rayCastMaxRange, _cubeCastLayerMask);
-            if (rayCastCnt <= 0) return;
+            var rayCastCnt = Physics.RaycastNonAlloc(ray, hits, Mathf.Infinity, _cubeCastLayerMask);
+            if (rayCastCnt <= 0) {
+                _isRayCastedOnCube = false;
+                return;
+            }
+
             hits = hits.Where(x => x.transform != null).ToArray();
             MainGameManager.instance.CanManipulateCamera = false;
             var min = hits.Min(x => x.distance);
             var nearest = hits.FirstOrDefault(x => x.distance <= min);
             if (nearest.transform != null) {
+                _isRayCastedOnCube = true;
+                _onClickedMousePosition = Input.mousePosition;
                 Debug.Log($"Hit piece", nearest.transform);
+            } else {
+                _isRayCastedOnCube = false;
             }
         }
+
+#if UNITY_EDITOR
+        private void Reset() {
+            _pieceOnFaceDetectors = GetComponentsInChildren<PieceOnFaceDetector>();
+            _command = GetComponent<RotateCubeCommand>();
+        }
+#endif
     }
 }
