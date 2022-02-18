@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using Game.Scripts.Common;
 using Game.Scripts.RubikCube.Const;
 using Game.Scripts.SceneLogic.GameScene;
@@ -53,9 +55,21 @@ namespace Game.Scripts.RubikCube {
             ConstructCubeData().Forget();
         }
 
+        private async UniTask PlayAnimationWhenNewGame() {
+            var cubeOriginal = Quaternion.identity;
+            // rotate horizontal 2 round and vertical 2 round
+            var yTargetAngle = Quaternion.AngleAxis(180, Vector3.up);
+            var xTargetAngle = Quaternion.AngleAxis(180, Vector3.right);
+            await _cameraPivotTarget.transform.DORotateQuaternion(yTargetAngle, 1f);
+            await _cameraPivotTarget.transform.DORotateQuaternion(xTargetAngle, 1f);
+            await UniTask.Delay(TimeSpan.FromSeconds(.5f));
+            await _cameraPivotTarget.transform.DORotateQuaternion(cubeOriginal, 1f);
+        }
+
         private async UniTask ConstructCubeData() {
             if (PlayerLocalSaveData.instance.LastPlayedRubickSize == 0) {
                 PlayerLocalSaveData.instance.LastPlayedRubickSize = _cubeSize;
+                await PlayAnimationWhenNewGame();
                 await ShuffleCube();
                 PlayerLocalSaveData.instance.LastPlayedCubePieceStateDatas = _cubePieces.Select(x => x.StateData).ToList();
                 PlayerLocalSaveData.Save();
