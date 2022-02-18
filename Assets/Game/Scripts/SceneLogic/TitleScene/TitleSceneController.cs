@@ -5,7 +5,7 @@ using Game.Scripts.SceneLogic.GameScene;
 using Game.Scripts.UI;
 using UnityEngine;
 
-namespace Game.Scripts.SceneLogic {
+namespace Game.Scripts.SceneLogic.TitleScene {
     public class TitleSceneController : BaseSceneController {
         [SerializeField] private GameMenuView _menuView;
 
@@ -32,6 +32,7 @@ namespace Game.Scripts.SceneLogic {
         }
 
         private static void StartNewGame(int cubeSize) {
+            PlayerLocalSaveData.Reset();
             var gameSceneContext = new GameSceneContext {
                 IsContinueGame = false,
                 CubeSize = cubeSize

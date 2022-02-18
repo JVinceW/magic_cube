@@ -38,6 +38,9 @@ namespace Game.Scripts.Common {
         }
 
         private void UpdateCameraManipulation() {
+            if (target == null) {
+                return;
+            }
             if (enableRotation && Input.GetMouseButton(0)) {
                 var camAngle = Quaternion.AngleAxis(Input.GetAxis("Mouse X") * rotationSpeedMouse, Vector3.up);
                 var camAngleY = Quaternion.AngleAxis(Input.GetAxis("Mouse Y") * rotationSpeedMouse, Vector3.right);
