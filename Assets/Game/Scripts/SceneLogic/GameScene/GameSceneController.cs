@@ -1,3 +1,4 @@
+using System;
 using Cysharp.Threading.Tasks;
 using Game.Scripts.Common;
 using Game.Scripts.Core.SceneManager;
@@ -19,14 +20,21 @@ namespace Game.Scripts.SceneLogic.GameScene {
 
         private GameSceneContext _context;
         private bool _isTimerRunning;
-        private readonly ReactiveProperty<long> _playTime = new LongReactiveProperty();
+        private readonly ReactiveProperty<float> _playTime = new FloatReactiveProperty();
         private CubeController _playingCube;
+        private IDisposable _cubeCheck;
 
         public override async UniTask CreateScene(BaseSceneContext sceneContext) {
             _context = (GameSceneContext)sceneContext;
             this.UpdateAsObservable().Subscribe(x => { CountPlayTime(); }).AddTo(this);
             await LoadCube();
-            _playingCube.GameFinished.Subscribe(isFinished => {
+            SetUpCubeCheck();
+            SetUpUi();
+        }
+
+        private void SetUpCubeCheck() {
+            _cubeCheck?.Dispose();
+            _cubeCheck = _playingCube.GameFinished.Subscribe(isFinished => {
                 if (isFinished) {
                     _gamePlayUI.ShowUntouchableImg(true);
                     GameScenePlayInfo.instance.CanManipulateCamera = false;
@@ -34,7 +42,6 @@ namespace Game.Scripts.SceneLogic.GameScene {
                     PlayWinGameEffect().Forget();
                 }
             }).AddTo(this);
-            SetUpUi();
         }
 
         private void SetUpUi() {
@@ -49,7 +56,8 @@ namespace Game.Scripts.SceneLogic.GameScene {
             Debug.Log($"Load Cube At Path: {path}");
             var cube = await Addressables.InstantiateAsync(path);
             _playingCube = cube.GetComponent<CubeController>();
-            _playingCube.InitCube();
+            await _playingCube.InitCube();
+            StartTimer();
             _orbitCamera.target = _playingCube.CameraPivotTarget.transform;
         }
 
@@ -61,7 +69,12 @@ namespace Game.Scripts.SceneLogic.GameScene {
 
         private void OnClickRestartGame() {
             PlayerLocalSaveData.Reset();
-            _playingCube.InitCube();
+            Addressables.Release(_playingCube.gameObject);
+            UniTask.Create(async () => {
+                await LoadCube();
+                SetUpCubeCheck();
+            }).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+
             _gamePlayUI.RestartGame();
             StopTimer();
             ResetTimer();
@@ -77,7 +90,8 @@ namespace Game.Scripts.SceneLogic.GameScene {
                 return;
             }
 
-            _playTime.Value += (long)Time.deltaTime;
+            _playTime.Value += Time.deltaTime;
+            Debug.Log($"Time: {_playTime.Value}");
         }
 
         private void StartTimer() {

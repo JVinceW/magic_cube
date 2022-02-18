@@ -34,7 +34,7 @@ namespace Game.Scripts.RubikCube {
         public BoolReactiveProperty GameFinished => _gameFinished;
         public GameObject CameraPivotTarget => _cameraPivotTarget;
 
-        public void InitCube() {
+        public async UniTask InitCube() {
             this.UpdateAsObservable()
                 .Where(x => Input.GetMouseButtonDown(0))
                 .Subscribe(x => {
@@ -59,7 +59,7 @@ namespace Game.Scripts.RubikCube {
                 .Where(x => _isRayCastedOnCube)
                 .Subscribe(x => ManipulateCube()).AddTo(this);
             _cubePieces = GetComponentsInChildren<CubePiece>().ToList();
-            ConstructCubeData().Forget();
+            await ConstructCubeData();
             _command.Dispose();
         }
 

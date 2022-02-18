@@ -20,13 +20,13 @@ namespace Game.Scripts.UI {
         [SerializeField] private Button _restartGameBtn;
 
         public IObservable<Unit> OnClickBackToTitleSceneBtn => _backToTitleSceneBtn.OnClickAsObservable();
-        private IObservable<Unit> OnClickShowHideTimerBtn => _showHideTimerBtn.OnClickAsObservable();
+        public IObservable<Unit> OnClickShowHideTimerBtn => _showHideTimerBtn.OnClickAsObservable();
         public IObservable<Unit> OnClickRestartGameBtn => _restartGameBtn.OnClickAsObservable();
 
         public IObservable<Unit> OnUndoBtnClick => _undoBtn.OnClickAsObservable();
-        private IObservable<Unit> OnMenuBtnClick => _menuBtn.OnClickAsObservable();
+        public IObservable<Unit> OnMenuBtnClick => _menuBtn.OnClickAsObservable();
 
-        public void ShowPlayTime(long seconds) {
+        public void ShowPlayTime(float seconds) {
             _timerTxt.SetText($"{seconds} s");
         }
 
@@ -37,19 +37,28 @@ namespace Game.Scripts.UI {
         private void Start() {
             OnMenuBtnClick.Subscribe(x => {
                 var isShow = !_menuPanel.activeSelf;
-                _menuPanel.SetActive(isShow);
+                ShowHideMenuPanel(isShow);
             }).AddTo(this);
 
             OnClickShowHideTimerBtn.Subscribe(x => {
                 var isShow = !_timerTxt.gameObject.activeSelf;
-                _timerTxt.gameObject.SetActive(isShow);
+                ShowHideTimer(isShow);
             }).AddTo(this);
+        }
+
+        public void ShowHideTimer(bool isShow) {
+            _timerTxt.gameObject.SetActive(isShow);   
+        }
+
+        public void ShowHideMenuPanel(bool isShow) {
+            _menuPanel.SetActive(isShow);
         }
 
         public void RestartGame() {
             _timerTxt.SetText("0s");
-            _timerTxt.gameObject.SetActive(true);
             ShowUntouchableImg(false);
+            ShowHideTimer(true);
+            ShowHideMenuPanel(false);
         }
     }
 }

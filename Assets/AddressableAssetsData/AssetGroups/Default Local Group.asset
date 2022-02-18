@@ -33,6 +33,10 @@ MonoBehaviour:
     m_Address: Assets/Game/Prefabs/RubikCube_3.prefab
     m_ReadOnly: 0
     m_SerializedLabels: []
+  - m_GUID: 23cbdc2ef9e90428ead0d19d5048c1b8
+    m_Address: Assets/Game/Prefabs/RubikCube_2.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 0f06b7c85a1d64fc1b5394eb9b5921f6, type: 2}
   m_SchemaSet:
