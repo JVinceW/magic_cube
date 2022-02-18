@@ -1,11 +1,20 @@
-﻿using Game.Scripts.Common.Singleton;
-using UnityEngine;
+﻿using Cysharp.Threading.Tasks;
+using Game.Scripts.Common;
+using Game.Scripts.Common.Singleton;
+using Game.Scripts.Core.SceneManager;
+using Game.Scripts.SceneLogic.TitleScene;
 
 namespace Game.Scripts.Core {
     public class MainGameManager : SingletonMonoBehaviour<MainGameManager> {
-        private int _cubePlaySize;
-        public int CubePlaySize => Mathf.Clamp(_cubePlaySize, 2, 6);
+        private GameState _gameState;
 
-        public bool CanManipulateCamera { get; set; } = true;
+        private void Start() {
+            InitGame().Forget();
+        }
+
+        private static async UniTask InitGame() {
+            var titleSceneContext = new TitleSceneContext();
+            await GameSceneManager.instance.LoadScene(GameConfig.SceneName.TITLE_SCENE_ADDRESS, titleSceneContext);
+        }
     }
 }

@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Game.Scripts.Common;
-using Game.Scripts.Core;
 using Game.Scripts.RubikCube.Const;
+using Game.Scripts.SceneLogic.GameScene;
 using NaughtyAttributes;
 using UniRx;
 using UniRx.Triggers;
@@ -18,6 +18,7 @@ namespace Game.Scripts.RubikCube {
         [SerializeField] private int _shuffleMinStep = 10;
         [SerializeField] private int _shuffleMaxStep = 20;
         [SerializeField] private int _cubeSize;
+        [SerializeField] private GameObject _cameraPivotTarget;
         private bool _isRayCastedOnCube;
         private bool _finishedInit;
         private Vector3 _onClickedMousePosition;
@@ -26,7 +27,9 @@ namespace Game.Scripts.RubikCube {
         private const float ROTATE_DIRECTION_DETECTION_THRESHOLD = 10;
         private List<CubePiece> _cubePieces = new List<CubePiece>();
 
-        private void Start() {
+        public GameObject CameraPivotTarget => _cameraPivotTarget;
+
+        public void InitCube() {
             this.UpdateAsObservable()
                 .Where(x => Input.GetMouseButtonDown(0))
                 .Subscribe(x => {
@@ -41,7 +44,7 @@ namespace Game.Scripts.RubikCube {
                     _isRayCastedOnCube = false;
                     _onClickedMousePosition = Vector3.zero;
                     _rayCastHitCubePiece = null;
-                    MainGameManager.instance.CanManipulateCamera = true;
+                    GameScenePlayInfo.instance.CanManipulateCamera = true;
                 }).AddTo(this);
             this.UpdateAsObservable()
                 .Where(x => _isRayCastedOnCube)
@@ -170,7 +173,7 @@ namespace Game.Scripts.RubikCube {
             }
 
             hits = hits.Where(x => x.transform != null).ToArray();
-            MainGameManager.instance.CanManipulateCamera = false;
+            GameScenePlayInfo.instance.CanManipulateCamera = false;
             var min = hits.Min(x => x.distance);
             var nearest = hits.FirstOrDefault(x => x.distance <= min);
             if (nearest.transform != null) {

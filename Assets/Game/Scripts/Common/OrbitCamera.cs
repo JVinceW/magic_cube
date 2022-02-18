@@ -1,5 +1,5 @@
 using Cysharp.Threading.Tasks;
-using Game.Scripts.Core;
+using Game.Scripts.SceneLogic.GameScene;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
@@ -21,17 +21,18 @@ namespace Game.Scripts.Common {
         private float _maxToClampMouse = 10;
 
         private void Start() {
-            _cameraOffset = transform.position - target.position;
             UniTask.Create(async () => {
                 await UniTask.WaitUntil(() => target != null);
+                _cameraOffset = transform.position - target.position;
                 transform.LookAt(target);
             }).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
+
             this.LateUpdateAsObservable()
-                // .SkipWhile(x => MainGameManager.instance.CanManipulateCamera == false)
                 .Subscribe(x => {
-                    if (MainGameManager.instance.CanManipulateCamera == false) {
+                    if (GameScenePlayInfo.instance.CanManipulateCamera == false) {
                         return;
                     }
+
                     UpdateCameraManipulation();
                 }).AddTo(this);
         }
@@ -61,6 +62,5 @@ namespace Game.Scripts.Common {
                 _cameraOffset = transform.position - target.position;
             }
         }
-
     }
 }

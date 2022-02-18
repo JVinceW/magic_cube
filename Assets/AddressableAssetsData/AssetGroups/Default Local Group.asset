@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Default Local Group
+  m_EditorClassIdentifier: 
+  m_GroupName: Default Local Group
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 99046442058ca40c5a546fbd3610b154
+  m_SerializeEntries:
+  - m_GUID: 4bfddd097d1c541689d1ed50f3e7af35
+    m_Address: Assets/Scenes/00_StartScene.unity
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: 07f48e5f8b7c94ac9b72bc024f17d44b
+    m_Address: Assets/Scenes/01_TitleScene.unity
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: 4325e3723857d45eb9c522076adb489d
+    m_Address: Assets/Scenes/02_MainScene.unity
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: 42c077585b0b645deae5af8f513d33bc
+    m_Address: Assets/Game/Prefabs/RubikCube_3.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 0f06b7c85a1d64fc1b5394eb9b5921f6, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 4737f45a20ca24896bf69a9c91df4146, type: 2}
+    - {fileID: 11400000, guid: c21ba3962407444e799c3d781462483d, type: 2}
