@@ -10,6 +10,7 @@ using NaughtyAttributes;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using Random = UnityEngine.Random;
 
 namespace Game.Scripts.RubikCube {
@@ -28,7 +29,9 @@ namespace Game.Scripts.RubikCube {
         private bool _isRotating;
         private const float ROTATE_DIRECTION_DETECTION_THRESHOLD = 10;
         private List<CubePiece> _cubePieces = new List<CubePiece>();
+        private readonly BoolReactiveProperty _gameFinished = new BoolReactiveProperty();
 
+        public BoolReactiveProperty GameFinished => _gameFinished;
         public GameObject CameraPivotTarget => _cameraPivotTarget;
 
         public void InitCube() {
@@ -36,6 +39,10 @@ namespace Game.Scripts.RubikCube {
                 .Where(x => Input.GetMouseButtonDown(0))
                 .Subscribe(x => {
                     if (!_finishedInit) {
+                        return;
+                    }
+
+                    if (EventSystem.current.IsPointerOverGameObject()) {
                         return;
                     }
                     CheckClickOnCubePiece();
@@ -53,6 +60,7 @@ namespace Game.Scripts.RubikCube {
                 .Subscribe(x => ManipulateCube()).AddTo(this);
             _cubePieces = GetComponentsInChildren<CubePiece>().ToList();
             ConstructCubeData().Forget();
+            _command.Dispose();
         }
 
         private async UniTask PlayAnimationWhenNewGame() {
@@ -116,8 +124,7 @@ namespace Game.Scripts.RubikCube {
             PlayerLocalSaveData.Reset();
         }
 
-        [Button("Undo Move")]
-        private void Undo() {
+        public void UndoMove() {
             _command.Undo().Forget();
         }
 
@@ -171,6 +178,7 @@ namespace Game.Scripts.RubikCube {
                     _command.AddCommand(selectedDetector, rotationType);
                     await _command.ExecuteRotate(selectedDetector, rotationType, this.GetCancellationTokenOnDestroy());
                     UpdateLocalStateAfterMove();
+                    CheckPuzzleDone();
                     _isRotating = false;
                 }).AttachExternalCancellation(this.GetCancellationTokenOnDestroy());
             }
@@ -201,9 +209,7 @@ namespace Game.Scripts.RubikCube {
 
         private void CheckPuzzleDone() {
             var isAllAtRightPos = _cubePieces.All(x => x.IsAtRightPosition());
-            if (isAllAtRightPos) {
-                
-            }
+            _gameFinished.Value = isAllAtRightPos;
         }
         
 
