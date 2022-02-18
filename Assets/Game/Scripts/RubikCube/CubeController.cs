@@ -63,6 +63,11 @@ namespace Game.Scripts.RubikCube {
             _command.Dispose();
         }
 
+        [Button("Test Init Cube On Editor")]
+        private void TestCube() {
+            InitCube().Forget();
+        }
+
         private async UniTask PlayAnimationWhenNewGame() {
             var cubeOriginal = Quaternion.identity;
             // rotate horizontal 2 round and vertical 2 round
@@ -91,7 +96,7 @@ namespace Game.Scripts.RubikCube {
             var playerData = PlayerLocalSaveData.instance.LastPlayedCubePieceStateDatas;
             var cubeLst = new List<CubePiece>(_cubePieces);
             foreach (var pieceState in playerData) {
-                var pieceCoord = new Vector3Int(pieceState.coordinatorX, pieceState.coordinatorY,
+                var pieceCoord = new Vector3(pieceState.coordinatorX, pieceState.coordinatorY,
                     pieceState.coordinatorZ);
                 var p = cubeLst.FirstOrDefault(x => x.OriginalCoord == pieceCoord);
                 if (p != null) {

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Game.Scripts.RubikCube {
     public class CubePiece : MonoBehaviour {
-        [SerializeField] private Vector3Int _originalCoord;
+        [SerializeField] private Vector3 _originalCoord;
         private readonly CubePieceStateData _stateData = new CubePieceStateData();
         private Vector3 _originalPos;
         
@@ -23,7 +23,7 @@ namespace Game.Scripts.RubikCube {
             }
         }
 
-        public Vector3Int OriginalCoord => _originalCoord;
+        public Vector3 OriginalCoord => _originalCoord;
 
         public void UpdatePieceWithStateData(CubePieceStateData data) {
             var pos = new Vector3(data.positionX, data.positionY, data.positionZ);
@@ -54,7 +54,7 @@ namespace Game.Scripts.RubikCube {
         [Button("Auto Setup coord")]
         private void AutoSetUpCoordOnEditor() {
             var pos = transform.localPosition;
-            _originalCoord = new Vector3Int(Convert.ToInt32(pos.x), Convert.ToInt32(pos.y), Convert.ToInt32(pos.z));
+            _originalCoord = new Vector3(Convert.ToInt32(pos.x), Convert.ToInt32(pos.y), Convert.ToInt32(pos.z));
         }
 #endif
     }
